@@ -1,27 +1,25 @@
+version: '3.8'
 services:
-  # Serviço 1: Banco de Dados
   db:
     image: postgres:15-alpine
-    container_name: meu_postgres_meunome
+    container_name: meu_postgres_homolog
     restart: always
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: senha_super_secreta
       POSTGRES_DB: banco_teste
     volumes:
-      - pg_dados:/var/lib/postgresql/data
+      - pg_dados_homolog:/var/lib/postgresql/data
     networks:
       - app-network
-
-  # Serviço 2: Aplicação Node.js
   app:
-    build: .
-    container_name: minha_api_node_meunome
-    restart: on-failure # Reinicia se falhar (ex: se o banco ainda estiver subindo)
+    image: ${REGISTRY_IMAGE:-ghcr.io/usuario/minha-api-node}:${IMAGE_TAG:-latest}
+    container_name: minha_api_node_homolog
+    restart: on-failure
     ports:
-      - "8050:8080"
+      - "8080:8080"
     environment:
-      DB_HOST: db # Nome do serviço do banco na rede do Compose
+      DB_HOST: db
       DB_USER: admin
       DB_PASSWORD: senha_super_secreta
       DB_NAME: banco_teste
@@ -29,12 +27,32 @@ services:
       - db
     networks:
       - app-network
-
-# Definição do Volume para persistência
 volumes:
-  pg_dados:
-
-# Definição da Rede isolada
+  pg_dados_homolog:
 networks:
   app-network:
     driver: bridge
+```[cite: 1]
+
+Depois, clique no botão verde **Commit changes...**[cite: 2].
+
+---
+
+### 2. Ativar as Permissões de Escrita no GitHub (Essencial)
+Para que o GitHub Actions consiga publicar a imagem no GHCR[cite: 1]:
+
+1. Clique em **Settings** no topo do repositório[cite: 1, 2].
+2. No menu lateral esquerdo, vá a **Actions** > **General**[cite: 1].
+3. Na secção **Workflow permissions**, selecione **Read and write permissions**[cite: 1].
+4. Clique em **Save**[cite: 1].
+
+---
+
+Assim que guardar, a pipeline vai disparar automaticamente! Pode acompanhar a execução no separador **Actions** no topo do repositório[cite: 1].<ElicitationsGroup>
+
+<ElicitationItem>
+<Query>Deseja ver como criar a tag de versão (v1.0.0) ou testar o procedimento de rollback?</Query>
+<Context>O utilizador já tem as instruções para configurar o CI/CD e pode precisar dos passos finais de validação.</Context>
+</ElicitationItem>
+
+</ElicitationsGroup>
