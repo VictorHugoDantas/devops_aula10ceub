@@ -8,7 +8,9 @@ permissions:
   packages: write
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/minha-api-node
+  # Nome em minúsculas para cumprir o padrão do Docker
+  IMAGE_NAME: victorhugodantas/minha-api-node
+
 jobs:
   build-and-publish:
     name: Build e Publicação no GHCR
@@ -16,12 +18,14 @@ jobs:
     steps:
       - name: Checkout do Código
         uses: actions/checkout@v4
+
       - name: Autenticação no GitHub Container Registry (GHCR)
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Extrair Metadados e Tags de Versionamento
         id: meta
         uses: docker/metadata-action@v5
@@ -31,6 +35,7 @@ jobs:
             type=raw,value=latest
             type=sha,prefix=
             type=semver,pattern={{version}}
+
       - name: Build e Push da Imagem Docker para o GHCR
         uses: docker/build-push-action@v5
         with:
@@ -38,6 +43,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
   deploy-homologacao:
     name: Deploy Automático com Docker Compose
     needs: build-and-publish
@@ -45,6 +51,14 @@ jobs:
     steps:
       - name: Checkout do Repositório
         uses: actions/checkout@v4
+
+      - name: Autenticação no GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Gerar Arquivo de Variáveis (.env) para o Compose
         run: |
           IMAGE_TAG=${GITHUB_SHA::7}
@@ -52,6 +66,7 @@ jobs:
           echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
           echo "=== Arquivo .env gerado para o deploy ==="
           cat .env
+
       - name: Executar Deploy no Ambiente de Homologação
         run: |
           echo "=== Efetuando pull da imagem no GHCR e atualizando contêineres ==="
@@ -60,4 +75,10 @@ jobs:
           docker compose ps
 ```[cite: 1]
 
-3. Clique no botão verde **"Commit changes..."** no canto superior direito para guardar o ficheiro na branch `main`[cite: 2].
+---
+
+### Como aplicar a correção:
+1. Vá à pasta `.github/workflows/` no repositório no GitHub.
+2. Abra o ficheiro `cd-pipeline.yml` e clique no ícone do lápis (**Edit**).
+3. Cole o código acima e clique em **Commit changes...**
+4. Volte ao separador **Actions**[cite: 3]: a nova execução deverá ficar verde!
