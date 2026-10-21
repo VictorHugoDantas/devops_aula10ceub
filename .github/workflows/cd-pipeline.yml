@@ -8,7 +8,6 @@ permissions:
   packages: write
 env:
   REGISTRY: ghcr.io
-  # Nome em minúsculas para cumprir o padrão do Docker
   IMAGE_NAME: victorhugodantas/minha-api-node
 
 jobs:
@@ -73,12 +72,3 @@ jobs:
           docker compose pull
           docker compose up -d --remove-orphans
           docker compose ps
-```[cite: 1]
-
----
-
-### Como aplicar a correção:
-1. Vá à pasta `.github/workflows/` no repositório no GitHub.
-2. Abra o ficheiro `cd-pipeline.yml` e clique no ícone do lápis (**Edit**).
-3. Cole o código acima e clique em **Commit changes...**
-4. Volte ao separador **Actions**[cite: 3]: a nova execução deverá ficar verde!
